@@ -41,9 +41,11 @@ public class LoginGUI extends JFrame {
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
         JButton loginButton = new JButton("Login");
+        JButton signupButton = new JButton("Sign Up");
         JButton cancelButton = new JButton("Cancel");
 
         buttonPanel.add(loginButton);
+        buttonPanel.add(signupButton);
         buttonPanel.add(cancelButton);
 
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
@@ -64,6 +66,19 @@ public class LoginGUI extends JFrame {
                 dispose();
             }
         });
+        
+        signupButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // TODO: Add functionality here
+
+                StudentDatabaseGUI mainApp = new StudentDatabaseGUI();
+                mainApp.setVisible(true);
+
+                dispose();
+            }
+        });
+        
     }
 
     public static void main(String[] args) {
