@@ -1,8 +1,11 @@
-package CS157A;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class LoginGUI extends JFrame {
 
@@ -58,12 +61,27 @@ public class LoginGUI extends JFrame {
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // TODO: Add real authentication
+                String username = userField.getText();
+                String password = new String(passField.getPassword());
 
-                StudentDatabaseGUI mainApp = new StudentDatabaseGUI();
-                mainApp.setVisible(true);
-
-                dispose();
+                String query = "SELECT access_level FROM users WHERE username = ? AND password = ?";
+                try (Connection conn = DatabaseConnection.getConnection();
+                     PreparedStatement stmt = conn.prepareStatement(query)) {
+                    stmt.setString(1, username);
+                    stmt.setString(2, password);
+                    ResultSet rs = stmt.executeQuery();
+                    if (rs.next()) {
+                        String accessLevel = rs.getString("access_level");
+                        StudentDatabaseGUI mainApp = new StudentDatabaseGUI(accessLevel);
+                        mainApp.setVisible(true);
+                        dispose();
+                    } else {
+                        JOptionPane.showMessageDialog(LoginGUI.this, "Invalid username or password.", "Login Failed", JOptionPane.ERROR_MESSAGE);
+                    }
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(LoginGUI.this, "Database error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
         

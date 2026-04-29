@@ -1,10 +1,11 @@
-package CS157A;
-import javax.swing.*;
 import java.awt.*;
+import javax.swing.*;
 
 public class StudentDatabaseGUI extends JFrame {
+    private String userRole;
 
-    public StudentDatabaseGUI() {
+    public StudentDatabaseGUI(String accessLevel) {
+        this.userRole = accessLevel;
         setTitle("Student Management System");
         setSize(900, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
