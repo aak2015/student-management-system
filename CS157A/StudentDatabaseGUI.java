@@ -28,17 +28,17 @@ public class StudentDatabaseGUI extends JFrame {
 
         JPanel inputPanel = new JPanel(new GridLayout(3, 4, 10, 10));
         inputPanel.add(new JLabel("Student ID:"));
-        inputPanel.add(new JTextField());
+        JTextField studentIDInput = inputPanel.add(new JTextField());
         inputPanel.add(new JLabel("First Name:"));
-        inputPanel.add(new JTextField());
+        JTextField firstNameInput = inputPanel.add(new JTextField());
         inputPanel.add(new JLabel("Last Name:"));
-        inputPanel.add(new JTextField());
+        JTextField lastNameInput = inputPanel.add(new JTextField());
         inputPanel.add(new JLabel("Email:"));
-        inputPanel.add(new JTextField());
+        JTextField emailInput = inputPanel.add(new JTextField());
         inputPanel.add(new JLabel("Major:"));
-        inputPanel.add(new JTextField());
+        JTextField majorInput = inputPanel.add(new JTextField());
         inputPanel.add(new JLabel("Search:"));
-        inputPanel.add(new JTextField());
+        inputPanel.add(new JTextField());//does search need a text field? i thought it would be a button
 
         String[] columns = {"StudentID", "First Name", "Last Name", "Email", "Major"};
         Object[][] data = {{"123456", "Example", "Example", "example@example.com", "Example Major"}};
@@ -48,16 +48,43 @@ public class StudentDatabaseGUI extends JFrame {
         //TODO: add functionality to Student buttons
 
         JPanel buttonPanel = new JPanel(new FlowLayout());
-        buttonPanel.add(new JButton("Add Student"));
-        buttonPanel.add(new JButton("Update Student"));
-        buttonPanel.add(new JButton("Delete Student"));
-        buttonPanel.add(new JButton("Search"));
+        JButton addButton = buttonPanel.add(new JButton("Add Student"));
+        JButton updateButton = buttonPanel.add(new JButton("Update Student"));
+        JButton deleteButton = buttonPanel.add(new JButton("Delete Student"));
+        JButton searchButton = buttonPanel.add(new JButton("Search"));
 
         panel.add(inputPanel, BorderLayout.NORTH);
         panel.add(scrollPane, BorderLayout.CENTER);
         panel.add(buttonPanel, BorderLayout.SOUTH);
 
+        addButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String studentID = studentIDInput.getText();
+                String firstName = firstNameInput.getText();
+                String lastName = lastNameInput.getText();
+                String email = emailInput.getText();
+                String major = majorInput.getText();
+
+                String query = "INSERT INTO Student(StudentID, FirstName, LastName, Email, Major) VALUES (?, ?, ?, ?, ?);";
+                try (Connection conn = DatabaseConnection.getConnection();
+                     PreparedStatement stmt = conn.prepareStatement(query)) {
+                    stmt.setString(1, studentID);
+                    stmt.setString(2, firstName);
+                    stmt.setString(3, lastName);
+                    stmt.setString(4, email);
+                    stmt.setString(5, major);
+                    ResultSet rs = stmt.executeQuery();
+                    
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(StudentDatabaseGUI.this, "Database error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
         return panel;
+        
     }
 
     private JPanel createCoursePanel() {
