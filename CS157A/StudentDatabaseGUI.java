@@ -37,15 +37,15 @@ public class StudentDatabaseGUI extends JFrame {
         JTextField emailInput = inputPanel.add(new JTextField());
         inputPanel.add(new JLabel("Major:"));
         JTextField majorInput = inputPanel.add(new JTextField());
-        inputPanel.add(new JLabel("Search:"));
-        inputPanel.add(new JTextField());//does search need a text field? i thought it would be a button
+        //inputPanel.add(new JLabel("Search:"));
+        //inputPanel.add(new JTextField());//does search need a text field? i thought it would be a button //just uses the normal text fields for searching
 
         String[] columns = {"StudentID", "First Name", "Last Name", "Email", "Major"};
         Object[][] data = {{"123456", "Example", "Example", "example@example.com", "Example Major"}};
         JTable table = new JTable(data, columns);
         JScrollPane scrollPane = new JScrollPane(table);
         
-        //TODO: add functionality to Student buttons
+        //TODO: add functionality to Student buttons //ideally it is successfully calling queries, but results need to be pushed back to the GUI
 
         JPanel buttonPanel = new JPanel(new FlowLayout());
         JButton addButton = buttonPanel.add(new JButton("Add Student"));
@@ -60,13 +60,91 @@ public class StudentDatabaseGUI extends JFrame {
         addButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String studentID = studentIDInput.getText();
-                String firstName = firstNameInput.getText();
-                String lastName = lastNameInput.getText();
-                String email = emailInput.getText();
-                String major = majorInput.getText();
+                String studentID = replaceIfEmpty(studentIDInput.getText(), "NULL");
+                String firstName = replaceIfEmpty(firstNameInput.getText(), "NULL");
+                String lastName = replaceIfEmpty(lastNameInput.getText(), "NULL");
+                String email = replaceIfEmpty(emailInput.getText(), "NULL");
+                String major = replaceIfEmpty(majorInput.getText(), "NULL");
 
                 String query = "INSERT INTO Student(StudentID, FirstName, LastName, Email, Major) VALUES (?, ?, ?, ?, ?);";
+                try (Connection conn = DatabaseConnection.getConnection();
+                     PreparedStatement stmt = conn.prepareStatement(query)) {
+                    stmt.setString(1, studentID);
+                    stmt.setString(2, firstName);
+                    stmt.setString(3, lastName);
+                    stmt.setString(4, email);
+                    stmt.setString(5, major);
+                    ResultSet rs = stmt.executeQuery();
+                    
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(StudentDatabaseGUI.this, "Database error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        updateButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String studentID = studentIDInput.getText();
+                String firstName = replaceIfEmpty(firstNameInput.getText(), "*");
+                String lastName = replaceIfEmpty(lastNameInput.getText(), "*");
+                String email = replaceIfEmpty(emailInput.getText(), "*");
+                String major = replaceIfEmpty(majorInput.getText(), "*");
+
+                String query = "UPDATE Student SET Major = ?, FirstName = ?, LastName = ?, Email = ? WHERE StudentID = ?;"; 
+                try (Connection conn = DatabaseConnection.getConnection();
+                     PreparedStatement stmt = conn.prepareStatement(query)) {
+                    stmt.setString(5, studentID);
+                    stmt.setString(2, firstName);
+                    stmt.setString(3, lastName);
+                    stmt.setString(4, email);
+                    stmt.setString(1, major);
+                    ResultSet rs = stmt.executeQuery();
+                    
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(StudentDatabaseGUI.this, "Database error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        deleteButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String studentID = replaceIfEmpty(studentIDInput.getText(), "*");
+                String firstName = replaceIfEmpty(firstNameInput.getText(), "*");
+                String lastName = replaceIfEmpty(lastNameInput.getText(), "*");
+                String email = replaceIfEmpty(emailInput.getText(), "*");
+                String major = replaceIfEmpty(majorInput.getText(), "*");
+
+                String query = "DELETE FROM Student WHERE studentID = ?, Major = ?, FirstName = ?, LastName = ?, Email = ?;";  //some kind of confirm is a good idea, this will wipe the database if clicked with empty fields.
+                try (Connection conn = DatabaseConnection.getConnection();
+                     PreparedStatement stmt = conn.prepareStatement(query)) {
+                    stmt.setString(1, studentID);
+                    stmt.setString(2, firstName);
+                    stmt.setString(3, lastName);
+                    stmt.setString(4, email);
+                    stmt.setString(5, major);
+                    ResultSet rs = stmt.executeQuery();
+                    
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(StudentDatabaseGUI.this, "Database error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        searchButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String studentID = replaceIfEmpty(studentIDInput.getText(), "*");
+                String firstName = replaceIfEmpty(firstNameInput.getText(), "*");
+                String lastName = replaceIfEmpty(lastNameInput.getText(), "*");
+                String email = replaceIfEmpty(emailInput.getText(), "*");
+                String major = replaceIfEmpty(majorInput.getText(), "*");
+
+                String query = "SELECT StudentID, FirstName, LastName, Email, Major FROM Student WHERE studentID = ?, Major = ?, FirstName = ?, LastName = ?, Email = ? ORDER BY studentID;";  //i don't know how to hook the results of the query to the results page.
                 try (Connection conn = DatabaseConnection.getConnection();
                      PreparedStatement stmt = conn.prepareStatement(query)) {
                     stmt.setString(1, studentID);
@@ -93,17 +171,17 @@ public class StudentDatabaseGUI extends JFrame {
 
         JPanel inputPanel = new JPanel(new GridLayout(3, 4, 10, 10));
         inputPanel.add(new JLabel("Course ID:"));
-        inputPanel.add(new JTextField());
+        JTextField courseIDInput = inputPanel.add(new JTextField());
         inputPanel.add(new JLabel("Course Name:"));
-        inputPanel.add(new JTextField());
+        JTextField nameInput = inputPanel.add(new JTextField());
         inputPanel.add(new JLabel("Department:"));
-        inputPanel.add(new JTextField());
+        JTextField departmentInput = inputPanel.add(new JTextField());
         inputPanel.add(new JLabel("Credits:"));
-        inputPanel.add(new JTextField());
+        JTextField creditsInput = inputPanel.add(new JTextField());
         inputPanel.add(new JLabel("Instructor:"));
-        inputPanel.add(new JTextField());
-        inputPanel.add(new JLabel("Search:"));
-        inputPanel.add(new JTextField());
+        JTestField instructorInput = inputPanel.add(new JTextField());
+        //inputPanel.add(new JLabel("Search:"));
+        //inputPanel.add(new JTextField());
 
         String[] columns = {"CourseID", "Course Name", "Department", "Credits", "Instructor"};
         Object[][] data = {{"CSEX123", "Example Class", "Example Department", "3", "Prof. Examples"}};
@@ -113,14 +191,118 @@ public class StudentDatabaseGUI extends JFrame {
         //TODO: add functionality to Course buttons
 
         JPanel buttonPanel = new JPanel(new FlowLayout());
-        buttonPanel.add(new JButton("Add Course"));
-        buttonPanel.add(new JButton("Update Course"));
-        buttonPanel.add(new JButton("Delete Course"));
-        buttonPanel.add(new JButton("Search"));
+        JButton addButton = buttonPanel.add(new JButton("Add Course"));
+        JButton updateButton = buttonPanel.add(new JButton("Update Course"));
+        JButton deleteButton = buttonPanel.add(new JButton("Delete Course"));
+        JButton searchButton = buttonPanel.add(new JButton("Search"));
 
         panel.add(inputPanel, BorderLayout.NORTH);
         panel.add(scrollPane, BorderLayout.CENTER);
         panel.add(buttonPanel, BorderLayout.SOUTH);
+
+        addButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String courseID = replaceIfEmpty(courseIDInput.getText(), "NULL");
+                String name = replaceIfEmpty(nameInput.getText(), "NULL");
+                String department = replaceIfEmpty(departmentInput.getText(), "NULL");
+                String credits = replaceIfEmpty(creditsInput.getText(), "NULL");
+                String instructor = replaceIfEmpty(instructorInput.getText(), "NULL");
+
+                String query = "INSERT INTO Courses(CourseID, CourseName, Department, Credits, Instructor) VALUES (?, ?, ?, ?, ?);";//mismatch between the graph and the code, likely to cause an error.
+                try (Connection conn = DatabaseConnection.getConnection();
+                     PreparedStatement stmt = conn.prepareStatement(query)) {
+                    stmt.setString(1, courseID);
+                    stmt.setString(2, name);
+                    stmt.setString(3, department);
+                    stmt.setString(4, credits);
+                    stmt.setString(5, instructor);
+                    ResultSet rs = stmt.executeQuery();
+                    
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(StudentDatabaseGUI.this, "Database error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        updateButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String courseID = courseIDInput.getText()
+                String name = replaceIfEmpty(nameInput.getText(), "*");
+                String department = replaceIfEmpty(departmentInput.getText(), "*");
+                String credits = replaceIfEmpty(creditsInput.getText(), "*");
+                String instructor = replaceIfEmpty(instructorInput.getText(), "*");
+
+                String query = "UPDATE Courses SET CourseName = ?, Department = ?, Credits = ?, Instructor = ? WHERE CourseID = ?;"; 
+                try (Connection conn = DatabaseConnection.getConnection();
+                     PreparedStatement stmt = conn.prepareStatement(query)) {
+                    stmt.setString(5, courseID);
+                    stmt.setString(2, name);
+                    stmt.setString(3, department);
+                    stmt.setString(4, credits);
+                    stmt.setString(1, instructor);
+                    ResultSet rs = stmt.executeQuery();
+                    
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(StudentDatabaseGUI.this, "Database error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        deleteButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String courseID = replaceIfEmpty(courseIDInput.getText(), "*");
+                String name = replaceIfEmpty(nameInput.getText(), "*");
+                String department = replaceIfEmpty(departmentInput.getText(), "*");
+                String credits = replaceIfEmpty(creditsInput.getText(), "*");
+                String instructor = replaceIfEmpty(instructorInput.getText(), "*");
+
+                String query = "DELETE FROM Coursese WHERE CourseID = ? CourseName = ?, Department = ?, Credits = ?, Instructor = ?";  //some kind of confirm is a good idea, this will wipe the database if clicked with empty fields.
+                try (Connection conn = DatabaseConnection.getConnection();
+                     PreparedStatement stmt = conn.prepareStatement(query)) {
+                    stmt.setString(1, courseID);
+                    stmt.setString(2, name);
+                    stmt.setString(3, department);
+                    stmt.setString(4, credits);
+                    stmt.setString(5, instructor);
+                    ResultSet rs = stmt.executeQuery();
+                    
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(StudentDatabaseGUI.this, "Database error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        searchButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String courseID = replaceIfEmpty(courseIDInput.getText(), "*");
+                String name = replaceIfEmpty(nameInput.getText(), "*");
+                String department = replaceIfEmpty(departmentInput.getText(), "*");
+                String credits = replaceIfEmpty(creditsInput.getText(), "*");
+                String instructor = replaceIfEmpty(instructorInput.getText(), "*");
+
+                String query = "SELECT CourseID, CourseName, Department, Credits, Instructor FROM Courses WHERE CourseID = ? CourseName = ?, Department = ?, Credits = ?, Instructor = ?;";  //i don't know how to hook the results of the query to the results page.
+                try (Connection conn = DatabaseConnection.getConnection();
+                     PreparedStatement stmt = conn.prepareStatement(query)) {
+                    stmt.setString(1, courseID);
+                    stmt.setString(2, name);
+                    stmt.setString(3, department);
+                    stmt.setString(4, credits);
+                    stmt.setString(5, instructor);
+                    ResultSet rs = stmt.executeQuery();
+                    
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(StudentDatabaseGUI.this, "Database error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
 
         return panel;
     }
@@ -192,4 +374,11 @@ public class StudentDatabaseGUI extends JFrame {
             gui.setVisible(true);
         });
     }
+
+    private static String replaceIfEmpty(String input, String replacement)
+    {
+        if(input.equals("")){return replacement;}
+        return input;
+    }
+        
 }
