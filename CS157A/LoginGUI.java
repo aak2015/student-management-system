@@ -1,4 +1,3 @@
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -6,6 +5,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import javax.swing.*;
 
 public class LoginGUI extends JFrame {
 
@@ -64,15 +64,19 @@ public class LoginGUI extends JFrame {
                 String username = userField.getText();
                 String password = new String(passField.getPassword());
 
-                String query = "SELECT access_level FROM users WHERE username = ? AND password = ?";
+                String query = "SELECT AccessLevel, StudentID FROM Login WHERE username = ? AND password = ?";
                 try (Connection conn = DatabaseConnection.getConnection();
-                     PreparedStatement stmt = conn.prepareStatement(query)) {
+                    PreparedStatement stmt = conn.prepareStatement(query)) {
                     stmt.setString(1, username);
                     stmt.setString(2, password);
                     ResultSet rs = stmt.executeQuery();
                     if (rs.next()) {
-                        String accessLevel = rs.getString("access_level");
-                        StudentDatabaseGUI mainApp = new StudentDatabaseGUI(accessLevel);
+                        String accessLevel = rs.getString("AccessLevel");
+                        int studentID = rs.getInt("StudentID");
+                        if(rs.wasNull()){
+                            studentID = -1;
+                        }
+                        StudentDatabaseGUI mainApp = new StudentDatabaseGUI(accessLevel, studentID);
                         mainApp.setVisible(true);
                         dispose();
                     } else {
@@ -89,9 +93,15 @@ public class LoginGUI extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // TODO: Add functionality here
+                
+                String username = userField.getText();
+                String password = new String(passField.getPassword());
+                if(username.isEmpty() || password.isEmpty()){
+                    JOptionPane.showMessageDialog(LoginGUI.this, "Please enter both username and password.", "Input Error", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
 
-                StudentDatabaseGUI mainApp = new StudentDatabaseGUI();
-                mainApp.setVisible(true);
+                String SQL = "INSERT INTO Login (username, password, AccessLevel) VALUES (?, ?, 'STUDENT')";
 
                 dispose();
             }
